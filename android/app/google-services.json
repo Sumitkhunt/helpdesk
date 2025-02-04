@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "755496305496",
+    "project_id": "fir-helpdesk-addb4",
+    "storage_bucket": "fir-helpdesk-addb4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755496305496:android:c859ba8ac23f46d4185b2d",
+        "android_client_info": {
+          "package_name": "com.example.demo_helpdesk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGGZodE6jUmhQVUZbK8FPOxsvTwYbM8d0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
