@@ -1,96 +1,54 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
-import 'user_dashboard.dart';
-import 'admin_dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'sign_in_screen.dart'; // Make sure you import the sign-in screen
 
-class SignInScreen extends StatefulWidget {
+class SignUpScreen extends StatefulWidget {
   @override
-  _SignInScreenState createState() => _SignInScreenState();
+  _SignUpScreenState createState() => _SignUpScreenState();
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String errorMessage = '';
   bool isLoading = false;
-  bool isFirebaseInitialized = false;
 
-  final String adminEmail = 'admin@gmail.com';
-  final String adminPassword = 'admin@123';
-  final String userEmail = 'user@gmail.com';
-  final String userPassword = 'user@123';
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeFirebase();
-  }
-
-  void _initializeFirebase() async {
-    try {
-      await Firebase.initializeApp();
-      setState(() {
-        isFirebaseInitialized = true;
-      });
-      print("Firebase initialized successfully");
-    } catch (e) {
-      setState(() {
-        errorMessage = "Failed to initialize Firebase: $e";
-      });
-    }
-  }
-
-  void signIn() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      setState(() {
-        errorMessage = "Email and Password cannot be empty.";
-      });
-      return;
-    }
-
+  // Method to sign up the user
+  void signUp() async {
     setState(() {
       errorMessage = '';
       isLoading = true;
     });
 
     try {
-      if (emailController.text == adminEmail &&
-          passwordController.text == adminPassword) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminDashboard()),
-        );
-      } else if (emailController.text == userEmail &&
-          passwordController.text == userPassword) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserDashboard()),
-        );
-      } else {
-        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
+      // Regular user sign-up
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
 
-        if (userCredential.user != null) {
-          if (emailController.text.contains('admin')) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => AdminDashboard()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => UserDashboard()),
-            );
-          }
-        }
+      if (userCredential.user != null) {
+        // Create user data in Firestore
+        await _firestore.collection('users').doc(userCredential.user!.uid).set({
+          'email': emailController.text,
+          'uid': userCredential.user!.uid,
+          'role': 'user',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+
+        // Redirect to sign-in screen after successful sign-up
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => SignInScreen()),
+        );
       }
     } catch (e) {
       setState(() {
-        errorMessage = "Failed to sign in. Check your credentials.";
+        errorMessage = "Failed to sign up: $e";
       });
     } finally {
       setState(() {
@@ -101,16 +59,9 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!isFirebaseInitialized) {
-      return Scaffold(
-        appBar: AppBar(title: Text("Sign In")),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign In",
+        title: Text("Sign Up",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
@@ -131,11 +82,12 @@ class _SignInScreenState extends State<SignInScreen> {
             children: [
               // Heading
               Text(
-                "Welcome Back!",
+                "Create Your Account",
                 style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               SizedBox(height: 30),
               // Email Input
@@ -166,9 +118,9 @@ class _SignInScreenState extends State<SignInScreen> {
                 obscureText: true,
               ),
               SizedBox(height: 20),
-              // Sign-in Button
+              // Sign Up Button
               ElevatedButton(
-                onPressed: isLoading ? null : signIn,
+                onPressed: isLoading ? null : signUp,
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.blueAccent,
@@ -180,10 +132,10 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
                 child: isLoading
                     ? CircularProgressIndicator(color: Colors.white)
-                    : Text("Sign In", style: TextStyle(fontSize: 18)),
+                    : Text("Sign Up", style: TextStyle(fontSize: 18)),
               ),
               SizedBox(height: 20),
-              // Display error message
+              // Display error message if any
               if (errorMessage.isNotEmpty)
                 Text(errorMessage,
                     style: TextStyle(color: Colors.red, fontSize: 14)),

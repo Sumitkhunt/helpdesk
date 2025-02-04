@@ -10,8 +10,10 @@ class AdminDashboard extends StatelessWidget {
       drawer: AppDrawer(),
       body: Center(
         child: ElevatedButton(
-          onPressed: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => TicketListScreen())),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TicketListScreen()),
+          ),
           child: Text("Manage Tickets"),
         ),
       ),

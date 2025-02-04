@@ -1,14 +1,9 @@
+import 'package:demo_helpdesk/screens/sign_up_screen.dart';
+import 'package:demo_helpdesk/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'screens/sign_in_screen.dart';
-import 'screens/user_dashboard.dart';
-import 'screens/admin_dashboard.dart';
-import 'screens/ticket_submission.dart';
-import 'screens/ticket_list.dart';
-import 'screens/ticket_details.dart';
-import 'widgets/app_drawer.dart';
+// Import User Dashboard screen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +21,7 @@ class HelpdeskApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Helpdesk',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -38,52 +34,87 @@ class HelpdeskApp extends StatelessWidget {
           bodyLarge: TextStyle(fontSize: 16, color: Colors.black87),
         ),
       ),
-      home: SignInScreen(),
+      home: HomeScreen(), // Replace with your home screen widget
     );
   }
 }
 
-class TicketService {
-  final CollectionReference tickets =
-      FirebaseFirestore.instance.collection('tickets');
-
-  Future<void> submitTicket(String description, String category,
-      String priority, String userId) async {
-    await tickets.add({
-      'description': description,
-      'category': category,
-      'status': 'Open',
-      'priority': priority,
-      'createdBy': userId,
-      'createdDate': Timestamp.now(),
-      'updatedBy': userId,
-      'updatedDate': Timestamp.now(),
-    });
-  }
-
-  Stream<QuerySnapshot> getUserTickets(String userId) {
-    return tickets.where('createdBy', isEqualTo: userId).snapshots();
-  }
-
-  Stream<QuerySnapshot> getAllTickets() {
-    return tickets.snapshots();
-  }
-
-  Future<void> updateTicketStatus(
-      String ticketId, String status, String adminId) async {
-    await tickets.doc(ticketId).update({
-      'status': status,
-      'updatedBy': adminId,
-      'updatedDate': Timestamp.now()
-    });
-  }
-
-  Future<void> addTicketComment(
-      String ticketId, String comment, String adminId) async {
-    await tickets.doc(ticketId).collection('comments').add({
-      'comment': comment,
-      'createdBy': adminId,
-      'createdDate': Timestamp.now(),
-    });
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Welcome to Helpdesk",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.blue.shade300],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Welcome to Our Helpdesk App!",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 40),
+              // Sign Up Button for User
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignUpScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blueAccent, // Text color
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 5, // Shadow effect
+                ),
+                child: Text("Sign Up as User", style: TextStyle(fontSize: 18)),
+              ),
+              SizedBox(height: 20),
+              // Sign In Button for User
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SignInScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.greenAccent, // Text color
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  elevation: 5, // Shadow effect
+                ),
+                child: Text("Sign In", style: TextStyle(fontSize: 18)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:demo_helpdesk/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/user_dashboard.dart';
 import '../screens/admin_dashboard.dart';
@@ -16,11 +17,11 @@ class AppDrawer extends StatelessWidget {
           ListTile(
               title: Text("User Dashboard"),
               onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => UserDashboard()))),
+                  MaterialPageRoute(builder: (context) => SignInScreen()))),
           ListTile(
               title: Text("Admin Dashboard"),
               onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => AdminDashboard()))),
+                  MaterialPageRoute(builder: (context) => SignInScreen()))),
         ],
       ),
     );
